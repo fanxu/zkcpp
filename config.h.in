@@ -1,0 +1,7 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#cmakedefine PACKAGE_STRING @PACKAGE_STRING@
+#cmakedefine POLL_NFDS_TYPE @POLL_NFDS_TYPE@
+
+#endif // CONFIG_H

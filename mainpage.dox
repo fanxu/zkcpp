@@ -1,0 +1,138 @@
+/**
+
+\example examples/zk_hello_world.cc
+
+@mainpage
+@tableofcontents
+
+\section quick Quickstart
+
+\subsection dep Dependencies
+
+Install all the dependencies:
+
+- git
+- ant
+- cmake
+- log4cxx
+- boost with thread, system, and filesystem libraries
+- googletest
+
+\subsection build Building and Installing
+
+Clone the git repository:
+
+\verbatim
+git://github.com/m1ch1/zookeeper.git
+\endverbatim
+
+This will create a local repository under zookeeper/ directory.
+
+\verbatim
+cd zookeeper/
+ZKHOME=`pwd`
+ant
+\endverbatim
+
+Now, compile the C++ client and install:
+
+\verbatim
+cd $ZKHOME/src/contrib/zkcpp
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+\endverbatim
+
+This will install a shared library \p libzkcpp.so under \p /usr/local/lib and include
+headers under \p /usr/local/include/zookeeper.
+
+\subsection server Starting a ZooKeeper Server in Standalone mode
+
+\verbatim
+cp $ZKHOME/conf/zoo_sample.cfg $ZKHOME/conf/zoo.cfg
+$ZKHOME/bin/zkServer.sh start
+echo ruok | nc localhost 2181
+\endverbatim
+
+You can find more information about the standalone mode in
+<a href="http://zookeeper.apache.org/doc/r3.1.2/zookeeperStarted.html#sc_InstallingSingleMode">
+ZooKeeper Getting Started Guide</a>.
+
+\subsection hello Hello, world!
+
+Now let's compile and run our first program, \ref examples/zk_hello_world.cc. This
+program creates a znode, reads from the znode and prints the value, and removes the
+znode.
+
+    cd $ZKHOME/src/contrib/zkcpp/examples
+    g++ zk_hello_world.cc -o zk_hello_world -I /usr/local/include -L /usr/local/lib -lzkcpp
+    ./zk_hello_world
+
+It should output something like this:
+
+    log4cxx: No appender could be found for logger (zookeeper.c).
+    log4cxx: Please initialize the log4cxx system properly.
+    /hello world
+
+The \ref logging section describes how to configure log4cxx logging to get rid of this warning.
+
+\section logging Logging
+
+Zkcpp uses <a href="http://logging.apache.org/log4cxx/index.html">Apache log4cxx</a> for logging.
+There are many ways to configure log4cxx, but the simplest way is to put a log4cxx configuration
+file named log4cxx.properties under the same directory as your executable that links against zkcpp.
+Here is a sample configuration that creates a log file test.log with the log level set to DEBUG:
+
+    log4j.rootLogger=DEBUG, file
+    log4j.appender.file=org.apache.log4j.RollingFileAppender
+    log4j.appender.file.File=test.log
+    log4j.appender.file.MaxFileSize=100MB
+    log4j.appender.file.MaxBackupIndex=1
+    log4j.appender.file.layout=org.apache.log4j.PatternLayout
+    log4j.appender.file.layout.ConversionPattern=%d [%t] %-5p %c:%L %m%n
+
+Run zk_hello_world after creating a log4cxx.properties with the above configuration in the same
+directory as zk_hello_world. This time, you should not see the log4cxx warnings, and there is a
+log file called test.log that contains debug logs like these:
+
+    2012-07-01 23:19:40,398 [0x7fff786a2960] DEBUG zookeeper.c:359 Initializing a ZooKeeper client: version=ZooKeeper C++ Client 3.5.0
+    2012-07-01 23:19:40,398 [0x7fff786a2960] DEBUG zookeeper.c:376 Initiating client connection, host=localhost:2181 sessionTimeout=30000 watcher=0 flags=0
+    2012-07-01 23:19:40,401 [0x7fff786a2960] DEBUG zk_adaptor.cc:92 starting threads...
+    ...
+
+\section model Data Model
+\section async Asynchronous and Synchronous APIs
+\section watch Watches
+\section stat Znode Stat
+
+Some \link org::apache::zookeeper::ZooKeeper ZooKeeper \endlink operations
+return a \link org::apache::zookeeper::data::Stat data::Stat \endlink object,
+which contains metadata information about a znode. The Stat contains the
+ following fields (from
+<a href="http://zookeeper.apache.org/doc/r3.4.3/zookeeperProgrammers.html#sc_zkStatStructure">
+ZooKeeper Programmer's Guide</a>):
+
+- \c czxid The zxid of the change that caused this znode to be created.
+- \c mzxid The zxid of the change that last modified this znode.
+- \c ctime The time in milliseconds from epoch when this znode was created.
+- \c mtime The time in milliseconds from epoch when this znode was last modified.
+- \c version The number of changes to the data of this znode.
+- \c cversion The number of changes to the children of this znode.
+- \c aversion The number of changes to the ACL of this znode.
+- \c ephemeralOwner The session id of the owner of this znode if the znode is an ephemeral node. If it is not an ephemeral node, it will be zero.
+- \c dataLength The length of the data field of this znode.
+- \c numChildren The number of children of this znode.
+
+You can pass the znode version to \link org::apache::zookeeper::ZooKeeper::set() set() \endlink
+and \link org::apache::zookeeper::ZooKeeper::remove() remove() \endlink operations, and aversion
+to \link org::apache::zookeeper::ZooKeeper::setAcl() setAcl() \endlink operation to avoid
+conflicting updates. These operations will fail with \link org::apache::zookeeper::ReturnCode::BadVersion
+ReturnCode::BadVersion \endlink return code if the (a)version passed to these operation
+does not match the current znode (a)version. You can pass -1 to these operations to bypass
+the version check.
+
+\section auth Authentication and Authorization
+
+*/

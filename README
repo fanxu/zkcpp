@@ -1,0 +1,42 @@
+# zkcpp: A Zookeeper C++ client library
+
+## API Documentation
+
+http://m1ch1.github.com/zkcpp/3.5.0/
+
+## Requirements
+
+- cmake
+- boost
+- log4cxx
+- googletest
+
+# How to Build
+
+1. Create a build directory and run cmake followed by make.
+
+        mkdir build
+        cmake ..
+        make
+
+2. To run all the unit tests, do:
+
+        make check
+
+   To run Valgrind on the unit tests: do:
+
+        make valcheck
+
+   To run cpplint on the source code files, do:
+
+        make lint
+
+   You can run an individual test. For example, to run all the test cases in
+   CppClient, do:
+
+        ./zktest --gtest_filter=CppClient.*
+
+   You can also specify an individual test case like this:
+
+        ./zktest --gtest_filter=CppClient.testCreate
+
